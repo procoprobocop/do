@@ -20,14 +20,13 @@ fi
 echo "Добавление папки Обмен на рабочем столе"
 sleep 3
 #создаём на рабочем столе файл .desktop
-DISKNAME=$(whiptail --title "Настройка сетевого диска" --inputbox "Введите hostname или ip-адрес сетевого диска организации (пример: ДО или 10.10.64.3) " 10 60 10.10.64.3  3>&1 1>&2 2>&3)
+DISKNAME=$(whiptail --title "Настройка сетевого диска" --inputbox "Введите hostname или ip-адрес сетевого диска организации (пример: srv007 или 10.10.64.3) " 10 60 10.10.64.3  3>&1 1>&2 2>&3)
 exitstatus=$?
 if [ $exitstatus = 0 ]; then
 echo "Вы добавили следующий сетевой диск:" $DISKNAME
-sleep 5
 #создаём переменную DOMAIN и присваиваем ей значение dns-имени домена
 DOMAIN=$(dnsdomainname -d)
-echo -e "[Desktop Entry]\nVersion=1.0\nType=Link\nIcon=mate-disk-usage-analyzer.png\nName[ru_RU]=Obmen\nURL=$DOMAIN;smb://$USER@$DISKNAME\nName[]=Obmen" > /home/$USER@$DOMAIN/Рабочий\ стол/Obmen.desktop
+echo -e "[Desktop Entry]\nVersion=1.0\nType=Link\nIcon=mate-disk-usage-analyzer.png\nName[ru_RU]=Obmen\nURL=$DOMAIN;smb://$USER@$DISKNAME\nName[]=Obmen" > /home/$USER@$DOMAIN/Рабочий\ стол/Obmen\ PTO.desktop
 #даём файлу Obmen.desktop права на выполнение
 chmod ugo+x /home/$USER@$DOMAIN/Рабочий\ стол/Obmen.desktop
 #устанавливаем редактор gui-оболочки и отключаем отображение смонтированных дисков на рабочем столе
@@ -57,7 +56,7 @@ sleep 3
 #скачиваем tar архив с установочными файлами из google drive
 cd /mnt/Disk2
 #в этой команде важен только ключ 17uKwXDsrsvGd18ktorGBmac9ImOmEPt0 именно он копируется из ссылки общего доступа, остальную конструкцию оставляем неизменной
-wget --load-cookies /tmp/cookies.txt "http://drive.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'http://drive.google.com/uc?export=download&id=1KbJqrulNUKfQUCCZA7ZKYnFTvsFIFAP0' -O- | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=1KbJqrulNUKfQUCCZA7ZKYnFTvsFIFAP0" -O repo.tar && rm -rf /tmp/cookies.txt
+wget --load-cookies /tmp/cookies.txt "http://drive.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://drive.google.com/uc?export=download&id=1KbJqrulNUKfQUCCZA7ZKYnFTvsFIFAP0' -O- | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=1KbJqrulNUKfQUCCZA7ZKYnFTvsFIFAP0" -O repo.tar && rm -rf /tmp/cookies.txt
 #распаковываем архив и заходим в директорию с установочными файлами
 tar -xvf repo.tar && rm -rf repo.tar && cd /mnt/Disk2/repo/
 #
@@ -67,16 +66,22 @@ echo "II. УСТАНОВКА И НАСТРОЙКА ПРОГРАММ"
 sleep 3
 PROGRAMMS=$(whiptail --title "Настройка доступа SSH" --checklist \
 "Выберите программы, которые требуется установить" 15 60 4 \
+"Spark" "внутренний чат" ON \
 "VipNet" "только для Тезис" OFF \
 "Kaspersky" "Агент администрирования" OFF \
 "Р7-office" "офисный пакет" OFF \
 "Wine" "для Windows-приложений" OFF \
 "Yandex.Browser" "основной браузер" OFF \
+"1С-terminal" "терминальная версия" OFF \
+"1С-console" "консольная версия" OFF \
 "CryptoPRO" "для использования ЭЦП" OFF \
 "Browser_plugin" "для использования ЭЦП" OFF \
+"DWGViewer" "для DWG-файлов" OFF \
 "Krita,Gimp,Pinta" "для графики" OFF \
 "VueScan" "для сканирования" OFF \
-"Printers" "Установка техники HP" OFF \
+"Rainlendar" "календарь" OFF \
+"HP" "Установка техники HP" OFF \
+"Kyocera" "Установка техники Kyocera" OFF \
 "Admin-tools" "для диагностики системы" OFF 3>&1 1>&2 2>&3)
 exitstatus=$?
 if [ $exitstatus = 0 ]; then
@@ -87,8 +92,23 @@ else
 fi
 for prog in $PROGRAMMS
 do
-
-#Устанавливаем VipNet
+    if [ $prog == "\"Spark\"" ]; then
+		echo "Установка чата Spark"
+		sleep 3
+		#запускаем установочный файл
+		echo "$PASSWORD" | sudo -S dnf -y install ./spark-2.9.4.rpm
+		#создаём переменную DOMAIN и присваиваем ей значение dns-имени домена
+		DOMAIN=$(dnsdomainname -d)
+		#создаём директорию автозагрузки и выдаём ей права
+		echo "$PASSWORD" | sudo -S mkdir -p /home/$USER@$DOMAIN/.config/autostart
+		echo "$PASSWORD" | sudo -S chmod 777 /home/$USER@$DOMAIN/.config/autostart
+		#создаём файл автозагрузки и выдаём ему права на выполнение
+		echo "$PASSWORD" | sudo -S echo -e "[Desktop Entry]\nType=Application\nExec=/bin/sh "/opt/Spark/Spark" %U\nHidden=false\nX-MATE-Autostart-enabled=true\nName=Spark\nX-MATE-Autostart-Delay=0" > /home/$USER@$DOMAIN/.config/autostart/spark.desktop
+		echo "$PASSWORD" | sudo -S chmod ugo+x /home/$USER@$DOMAIN/.config/autostart/spark.desktop
+		/bin/sh "/opt/Spark/Spark" %U > /dev/null 2>&1 &
+		echo "Настройку учётной записи выполняете самостоятельно"
+		sleep 3
+	fi
     if [ $prog == "\"VipNet\"" ]; then
         echo "Установка и настройка VipNet Client"
 		sleep 3
@@ -125,7 +145,7 @@ fi
 		vipnetclient debug --autostart
 		#в файле vipnet.conf указываем контроллеры домена
 		echo "$PASSWORD" | sudo -S sed -i '9d' /etc/vipnet.conf
-		echo "$PASSWORD" | sudo -S perl -i -pe 'print "trusted=10.14.100.222,10.17.101.222\n" if $. == 9' /etc/vipnet.conf
+		echo "$PASSWORD" | sudo -S perl -i -pe 'print "trusted=10.14.100.200,10.17.101.222\n" if $. == 9' /etc/vipnet.conf
 		#включаем видимость туннелируемых узлов по реальным адресам
 		echo "$PASSWORD" | sudo -S systemctl stop vipnetclient
 		vipnetclient debug --tunnel-visibility 0
@@ -143,15 +163,14 @@ fi
 		echo "$PASSWORD" | sudo -S vipnetclient eventlog --psw $VIPPASSORG --output /var/log/vipnetlog/
 		echo "Журнал создан, он находится здесь: /var/log/vipnetlog/"
 		sleep 3
-		
-#Устанавливаем Kaspersky
-    if [ $prog == "\"Kaspersky\"" ]; then
-        echo "Установка антивируса Касперского"
-		sleep 3
 else
 	echo "Вы выбрали отмену."
 	exit
 fi
+    fi
+    if [ $prog == "\"Kaspersky\"" ]; then
+        echo "Установка антивируса Касперского"
+		sleep 3
 		#запускаем установочный пакеты агента
 		cd /mnt/Disk2/repo/Kaspersky/
 		echo "$PASSWORD" | sudo -S dnf -y install klnagent64-*.rpm
@@ -161,8 +180,7 @@ fi
 		sudo /opt/kaspersky/klnagent64/lib/bin/setup/postinstall.pl
 		echo "Установка Kaspersky Endpoint Security выполняется только из Сервера администрирования Касперского!"
 		sleep 10
-		
-#Устанавливаем P7
+    fi
     if [ $prog == "\"Р7-office\"" ]; then
         echo "Установка офиса Р-7"
 		sleep 3
@@ -184,8 +202,6 @@ fi
 		echo "Лицензию активируете самостоятельно"
 		sleep 15
     fi
-	
-#Устанавливаем Wine
 	if [ $prog == "\"Wine\"" ]; then
         echo "Установка Wine"
 		sleep 3
@@ -201,8 +217,6 @@ fi
 		wine --version
 		sleep 5
     fi
-	
-#Устанавливаем Yandex.Browser
 	if [ $prog == "\"Yandex.Browser\"" ]; then
         echo "Установка Яндекс.браузер"
 		sleep 3
@@ -211,8 +225,41 @@ fi
 		#назначение браузером по умолчанию
 		xdg-settings set default-web-browser yandex-browser.desktop
     fi
-	
-#Устанавливаем CryptoPRO
+	if [ $prog == "\"1С-terminal\"" ]; then
+        echo "Установка 1С (терминальная)"
+		sleep 3
+		#создаём на рабочем столе файл .desktop
+		echo "$PASSWORD" | sudo -S echo -e "[Desktop Entry]\nType=Application\nExec=remmina-file-wrapper %U\nName=1C\nStartupNotify=true\nComment=1C\nIcon=/usr/share/icons/redos/48x48/status/network-idle.png" > /home/$USER@$DOMAIN/Рабочий\ стол/1C.desktop
+		#создаём переменную DOMAIN и присваиваем ей значение dns-имени домена
+		DOMAIN=$(dnsdomainname -d)
+		#даём права на выполнение
+		chmod ugo+x /home/$USER@$DOMAIN/Рабочий\ стол/1C.desktop
+		echo "После запуска RDP-клиента вводим ip-адрес сервера 1С"
+		sleep 3
+    fi
+	if [ $prog == "\"1С-console\"" ]; then
+        echo "Установка 1C (консольная)"
+		sleep 3
+		#заходим в директорию с установочными пакетами и запускаем их
+		cd /mnt/Disk2/repo/1C
+		echo "$PASSWORD" | sudo -S dnf -y install webkitgtk3-*.rpm webkitgtk3-devel-*.rpm
+		echo "$PASSWORD" | sudo -S dnf -y install 1c-enterprise-*-client-*.rpm 1c-enterprise-*-common-*.rpm 1c-enterprise-*-server-*.rpm 1c-enterprise-*-client-nls-*.rpm 1c-enterprise-*-ws-*.rpm 1c-enterprise-*-ws-nls-*.rpm 1c-enterprise-*-crs-*.rpm
+		#копируем иконку
+		echo "$PASSWORD" | sudo -S cp -r /mnt/Disk2/repo/1C/1c.ico /usr/share/icons/
+		#создаём на рабочем столе файл .desktop
+		echo "$PASSWORD" | sudo -S echo -e "[Desktop Entry]\nType=Application\nExec=/opt/1cv8/x86_64/8.3.18.1289/1cestart\nName[ru_RU]=1С:Предприятие\nStartupNotify=true\nComment[ru_RU]=1С:Предприятие x86_64\nIcon=/usr/share/icons/1c.ico" > /home/$USER@$DOMAIN/Рабочий\ стол/1С:Предприятие.desktop
+		#создаём переменную DOMAIN и присваиваем ей значение dns-имени домена
+		DOMAIN=$(dnsdomainname -d)
+		#даём права на выполнение
+		chmod ugo+x /home/$USER@$DOMAIN/Рабочий\ стол/1С:Предприятие.desktop
+		#поднимаемся на директорию выше и обновляем значки рабочего стола
+		cd /mnt/Disk2/repo/
+		echo "$PASSWORD" | sudo -S gtk-update-icon-cache -f -t /usr/share/icons/hicolor
+		echo "$PASSWORD" | sudo -S update-mime-database /usr/share/mime
+		echo "$PASSWORD" | sudo -S update-desktop-database /usr/share/applications
+		echo "После установки запустите 1С-клиент и укажите авторизационные данные сервера 1С"
+		sleep 3
+    fi
 	if [ $prog == "\"CryptoPRO\"" ]; then
         echo "Установка КРИПТО-ПРО"
 		sleep 3 
@@ -235,8 +282,6 @@ fi
 		echo "$PASSWORD" | sudo -S dnf -y install http://ds-plugin.gosuslugi.ru/plugin/upload/assets/distrib/IFCPlugin-x86_64.rpm
 		cd /mnt/Disk2/repo/
     fi
-
-#Устанавливаем Browser_plugin
 	if [ $prog == "\"Browser_plugin\"" ]; then
         echo "Установка расширений для браузеров"
 		echo "Плагин Госуслуги"
@@ -252,7 +297,7 @@ fi
 		cd /mnt/Disk2/repo/plugins/
 		#ставим пакет с плагином в систему, а затем инсталируем его руками в браузер 
 		echo "$PASSWORD" | sudo -S dnf -y install ./cprocsp-pki*rpm
-		python -m webbrowser "http://chrome.google.com/webstore/detail/cryptopro-extension-for-c/iifchhfnnmpdbibifmljnfjhpififfog?hl=ru && xdg-open http://www.cryptopro.ru/sites/default/files/products/cades/demopage/cades_bes_sample.html"
+		python -m webbrowser "http://chrome.google.com/webstore/detail/cryptopro-extension-for-c/iifchhfnnmpdbibifmljnfjhpififfog?hl=ru && xdg-open https://www.cryptopro.ru/sites/default/files/products/cades/demopage/cades_bes_sample.html"
 		echo "Вставьте носитель с сертификатом и проверяем подпись в появившемся диалоговом окне выбираем разрешить операцию ОК"
 		sleep 60
 		killall yandex_browser
@@ -279,8 +324,21 @@ fi
 		killall yandex_browser
 		sleep 10
     fi
-	
-#устанавливаем VueScan
+	if [ $prog == "\"DWGViewer\"" ]; then
+        echo "Установка DWGViewer"
+		sleep 3
+		#устанавливаем читалку для AutoCAD-файлов
+		cd /mnt/Disk2/repo/
+		echo "$PASSWORD" | sudo -S dnf -y install freeglut-devel
+		echo "$PASSWORD" | sudo -S dnf -y install http://www.varicad.com/userdata/files/release/en/VariCAD_2022-en-2.05-1.x86_64.rpm
+    fi
+	if [ $prog == "\"Krita,Gimp,Pinta\"" ]; then
+        echo "Установка графических редакторов"
+		sleep 3
+		#устанавливаем пакеты для сканирования и распознования текста
+		echo "$PASSWORD" | sudo -S dnf -y install krita gimp pinta yagf aspell-ru aspell-en yagf-0.9.5-5.el7.i686 xsane libksane libksane-devel
+		echo "$PASSWORD" | sudo -S dnf -y install  pantum-drivers-sane perl-Image-Sane sane-backends-daemon sane-backends-devel sane-frontends xsane-gimp
+    fi
 	if [ $prog == "\"VueScan\"" ]; then
         echo "Установка программы для сканирования VueScan"
 		sleep 3
@@ -289,9 +347,21 @@ fi
 		echo "Настройки программы VueScan выполняете самостоятельно"
 		sleep 3
     fi
-	
-#Устанавливаем Printers
-	if [ $prog == "\"Printers\"" ]; then
+	if [ $prog == "\"Rainlendar\"" ]; then
+        echo "Установка Календаря"
+		sleep 3
+		#распаковываем архив со скриптом и помещаем его в общую директорию 
+		cd /mnt/Disk2/repo/
+		tar jxvf Rainlendar*.tar.bz2
+		echo "$PASSWORD" | sudo -S cp -r rainlendar2 /usr/share/
+		#создаём переменную DOMAIN и присваиваем ей значение dns-имени домена
+		DOMAIN=$(dnsdomainname -d)
+		#добавляем файл .desktop в автозагрузку и даём ему права на выполнение 
+		echo "$PASSWORD" | sudo -S echo -e "[Desktop Entry]\nType=Application\nExec=/usr/share/rainlendar2/rainlendar2\nHidden=false\nX-MATE-Autostart-enabled=true\nName=Rainlendar\nX-MATE-Autostart-Delay=0" > /home/$USER@$DOMAIN/.config/autostart/rainlendar.desktop
+		echo "$PASSWORD" | sudo -S chmod ugo+x /home/$USER@$DOMAIN/.config/autostart/rainlendar.desktop
+		/usr/share/rainlendar2/rainlendar2 > /dev/null 2>&1 & 
+    fi
+	if [ $prog == "\"HP\"" ]; then
         echo "Установка принтера\МФУ\сканера фирмы HP"
 		sleep 3
 		#устанавливаем драйвера и вспомогательные утилиты
@@ -306,8 +376,25 @@ fi
 		echo "Все настройки выполняете самостоятельно"
 		sleep 3
     fi
-
-#Устанавливаем Admin-tools
+	if [ $prog == "\"Kyocera\"" ]; then
+        echo "Установка принтера\МФУ\сканера фирмы Kyocera"
+		sleep 3
+		#устанавливаем драйвера и вспомогательные утилиты
+		echo "$PASSWORD" | sudo -S dnf -y install manufacturer-PPDs OpenPrintingPPDs-ghostscript OpenPrintingPPDs-postscript libjpeg cups-devel net-snmp python-cups-doc PyQt4 python3-PyQt4 python-reportlab
+		#выставляем python3 программой для запуска скриптов .py по умолчанию 
+		echo "$PASSWORD" | sudo -S ln -fs /usr/bin/python3 /usr/bin/python
+		#перезапускаем службу печати
+		echo "$PASSWORD" | sudo -S systemctl enable cups
+		echo "$PASSWORD" | sudo -S systemctl restart cups
+		#запускаем интерактивный устаночный файл
+		cd /mnt/Disk2/repo/Kyocera
+		echo "$PASSWORD" | sudo -S dnf -y install kyodialog*.rpm
+		echo "$PASSWORD" | sudo -S dnf -y install kyocera-sane*.rpm
+		#запускаем интерактивный устаночный файл
+		echo "$PASSWORD" | sudo -S system-config-printer
+		echo "Все кастомные настройки выполняете самостоятельно"
+		sleep 3
+    fi
 	if [ $prog == "\"Admin-tools\"" ]; then
         echo "Установка программ для диагностики компьютера и системы"
 		sleep 3
@@ -321,46 +408,3 @@ done
 #
 #
 #
-echo "Добавляем маршрут для Тезис"
-ROUTE=$(whiptail --title  "Добавляем маршрут для Тезис" --checklist \
-"Выберите к какому учреждению относится ПК?" 15 60 4 \
-"ДО" "Департамент образования" ON \
-"ДИР" "Дирекция" OFF 3>&1 1>&2 2>&3)
-exitstatus=$?
-if [ $exitstatus = 0 ]; then
-    echo "Вы выбрали:" $ROUTE
-	sleep 5
-else
-    echo "Вы выбрали отмену."
-fi
-for routing in $ROUTE
-do
-#Настраиваем маршрут для Департамента образования
-    if [ $routing == "\"ДО\"" ]; then
-        echo "Настраиваем маршрут для Департамента образования"
-		sleep 3
-		#запускаем установочные пакеты
-		cd /etc/sysconfig/network-scripts/
-		echo "$PASSROOT" | sudo -S perl -i -pe 'print "%ADDRESS0=91.242.171.222\n" if $. == 1' route-enp0s3
-		echo "$PASSROOT" | sudo -S perl -i -pe 'print "%NETMASK0=255.255.255.255\n" if $. == 2' route-enp0s3
-		echo "$PASSROOT" | sudo -S perl -i -pe 'print "%GATEWAY0=10.10.27.254\n" if $. == 3' route-enp0s3
-		echo "$PASSROOT" | sudo -S systemctl restart NetworkManager
-
-	fi
-#Настраиваем маршрут для Дирекции
-	if [ $routing == "\"ДИР\"" ]; then
-        sleep 3
-		#запускаем установочные пакеты
-		cd /etc/sysconfig/network-scripts/
-		echo "$PASSROOT" | sudo -S perl -i -pe 'print "%ADDRESS0=91.242.171.222\n" if $. == 1' route-enp0s3
-		echo "$PASSROOT" | sudo -S perl -i -pe 'print "%NETMASK0=255.255.255.255\n" if $. == 2' route-enp0s3
-		echo "$PASSROOT" | sudo -S perl -i -pe 'print "%GATEWAY0=10.10.64.254\n" if $. == 3' route-enp0s3
-		echo "$PASSROOT" | sudo -S systemctl restart NetworkManager
-
-    fi
-done
-#
-#
-#
-echo "НЕ ЗАБЫВАЕМ ДОБАВИТЬ СЕРТИФИКАТЫ YG.ROOT в ЯНДЕКС.БРАУЗЕР!!!!!"
-sleep 10
