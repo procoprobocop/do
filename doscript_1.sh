@@ -57,7 +57,7 @@ realm discover YG.loc
 #устанавливаем программу добавления в домен
 echo "$PASSWORD" | sudo -S dnf -y install join-to-domain
 #запускаем скрипт добавления в домен
-sudo join-to-domain.sh
+sudo join-to-domain.sh || sudo join-to-domain.sh
 realm discover YG.loc
 #проверяем доступность домена
 realm list
