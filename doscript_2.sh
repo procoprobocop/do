@@ -9,7 +9,7 @@ sleep 3
 DOMAIN=$(dnsdomainname -d)
 #создаём мягкую ссылку диска Disk2 на рабочем столе
 ln -s /mnt/Disk2 /home/$USER@$DOMAIN/Рабочий\ стол/
-echo "$PASSWORD" | sudo -S chmod 777 /home/$USER@$DOMAIN/Рабочий\ стол/
+echo "$PASSWORD" | sudo -S chmod 777 /mnt/Disk2
 else
 	echo "Вы выбрали отмену."
 	exit
