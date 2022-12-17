@@ -7,7 +7,6 @@ exitstatus=$?
 if [ $exitstatus = 0 ]; then
 echo "Производится обновление системы"
 sleep 3
-echo "$PASSWORD" | sudo -S dnf -y install kernel-lt-5.15.35-1.el7.3.x86_64 kernel-lt-tools-5.15.35-1.el7.3.x86_64 kernel-lt-devel-5.15.35-1.el7.3.x86_64 kernel-lt-headers-5.15.35-1.el7.3.x86_64
 echo "$PASSWORD" | sudo -S dnf -y update && echo "$PASSWORD" | sudo -S dnf -y upgrade && echo "$PASSWORD" | sudo -S dnf -y autoremove && uname -r
 else
 	echo "Вы выбрали отмену."
