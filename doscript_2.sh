@@ -344,6 +344,8 @@ do
 		echo "$PASSROOT" | sudo -S perl -i -pe 'print "%ADDRESS0=91.242.171.222\n" if $. == 1' route-enp0s3
 		echo "$PASSROOT" | sudo -S perl -i -pe 'print "%NETMASK0=255.255.255.255\n" if $. == 2' route-enp0s3
 		echo "$PASSROOT" | sudo -S perl -i -pe 'print "%GATEWAY0=10.10.27.254\n" if $. == 3' route-enp0s3
+		echo "$PASSROOT" | sudo -S systemctl restart NetworkManager
+
 	fi
 #Настраиваем маршрут для Дирекции
 	if [ $routing == "\"ДИР\"" ]; then
@@ -353,6 +355,8 @@ do
 		echo "$PASSROOT" | sudo -S perl -i -pe 'print "%ADDRESS0=91.242.171.222\n" if $. == 1' route-enp0s3
 		echo "$PASSROOT" | sudo -S perl -i -pe 'print "%NETMASK0=255.255.255.255\n" if $. == 2' route-enp0s3
 		echo "$PASSROOT" | sudo -S perl -i -pe 'print "%GATEWAY0=10.10.64.254\n" if $. == 3' route-enp0s3
+		echo "$PASSROOT" | sudo -S systemctl restart NetworkManager
+
     fi
 done
 #
