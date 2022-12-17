@@ -56,7 +56,7 @@ sleep 3
 #скачиваем tar архив с установочными файлами из google drive
 cd /mnt/Disk2
 #в этой команде важен только ключ 17uKwXDsrsvGd18ktorGBmac9ImOmEPt0 именно он копируется из ссылки общего доступа, остальную конструкцию оставляем неизменной
-wget --load-cookies /tmp/cookies.txt "http://drive.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://drive.google.com/uc?export=download&id=1KbJqrulNUKfQUCCZA7ZKYnFTvsFIFAP0' -O- | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=1KbJqrulNUKfQUCCZA7ZKYnFTvsFIFAP0" -O repo.tar && rm -rf /tmp/cookies.txt
+wget --load-cookies /tmp/cookies.txt "https://drive.google.com/uc?export=download&confirm=$(wget --quiet --save-cookies /tmp/cookies.txt --keep-session-cookies --no-check-certificate 'https://drive.google.com/uc?export=download&id=1KbJqrulNUKfQUCCZA7ZKYnFTvsFIFAP0' -O- | sed -rn 's/.*confirm=([0-9A-Za-z_]+).*/\1\n/p')&id=1KbJqrulNUKfQUCCZA7ZKYnFTvsFIFAP0" -O repo.tar && rm -rf /tmp/cookies.txt
 #распаковываем архив и заходим в директорию с установочными файлами
 tar -xvf repo.tar && rm -rf repo.tar && cd /mnt/Disk2/repo/
 #
@@ -185,7 +185,7 @@ fi
         echo "Установка офиса Р-7"
 		sleep 3
 		#запускаем установочный пакет
-		echo "$PASSWORD" | sudo -S dnf -y install http://download.r7-office.ru/centos/r7-office.rpm
+		echo "$PASSWORD" | sudo -S dnf -y install https://download.r7-office.ru/centos/r7-office.rpm
 		#устанавливаем шрифты Microsoft
 		echo "$PASSWORD" | sudo -S dnf -y install libxcrypt-compat msttcore-fonts-installer
 		#добавляем в программы по умолчанию
@@ -221,7 +221,7 @@ fi
         echo "Установка Яндекс.браузер"
 		sleep 3
 		#запуск установочных пакетов 
-		echo "$PASSWORD" | sudo -S dnf -y install http://repo.yandex.ru/yandex-browser/rpm/stable/x86_64/yandex-browser-stable-22.11.3.838-1.x86_64.rpm
+		echo "$PASSWORD" | sudo -S dnf -y install https://repo.yandex.ru/yandex-browser/rpm/stable/x86_64/yandex-browser-stable-22.11.3.838-1.x86_64.rpm
 		#назначение браузером по умолчанию
 		xdg-settings set default-web-browser yandex-browser.desktop
     fi
@@ -279,7 +279,7 @@ fi
 		#устанавливаем инструменты для подписи, хранения ключевых носителей и шифрования
 		echo "$PASSWORD" | sudo -S dnf -y install ifd-rutokens token-manager ifcplugin gostcryptogui caja-gostcryptogui
 		echo "$PASSWORD" | sudo -S dnf -y install cprocsp-rdr-jacarta-*.rpm
-		echo "$PASSWORD" | sudo -S dnf -y install http://ds-plugin.gosuslugi.ru/plugin/upload/assets/distrib/IFCPlugin-x86_64.rpm
+		echo "$PASSWORD" | sudo -S dnf -y install https://ds-plugin.gosuslugi.ru/plugin/upload/assets/distrib/IFCPlugin-x86_64.rpm
 		cd /mnt/Disk2/repo/
     fi
 	if [ $prog == "\"Browser_plugin\"" ]; then
@@ -288,7 +288,7 @@ fi
 		sleep 3
 		#ставим пакет с плагином в систему, а затем инсталируем его руками в браузер 
 		#Будем делать на примере браузера Яндекс.Браузер
-		python -m webbrowser "http://chrome.google.com/webstore/detail/расширение-для-плагина-го/pbefkdcndngodfeigfdgiodgnmbgcfha?hl=ru&authuser=1"
+		python -m webbrowser "https://chrome.google.com/webstore/detail/расширение-для-плагина-го/pbefkdcndngodfeigfdgiodgnmbgcfha?hl=ru&authuser=1"
 		sleep 60
 		killall yandex_browser
 		sleep 10
@@ -297,14 +297,14 @@ fi
 		cd /mnt/Disk2/repo/plugins/
 		#ставим пакет с плагином в систему, а затем инсталируем его руками в браузер 
 		echo "$PASSWORD" | sudo -S dnf -y install ./cprocsp-pki*rpm
-		python -m webbrowser "http://chrome.google.com/webstore/detail/cryptopro-extension-for-c/iifchhfnnmpdbibifmljnfjhpififfog?hl=ru && xdg-open https://www.cryptopro.ru/sites/default/files/products/cades/demopage/cades_bes_sample.html"
+		python -m webbrowser "https://chrome.google.com/webstore/detail/cryptopro-extension-for-c/iifchhfnnmpdbibifmljnfjhpififfog?hl=ru && xdg-open https://www.cryptopro.ru/sites/default/files/products/cades/demopage/cades_bes_sample.html"
 		echo "Вставьте носитель с сертификатом и проверяем подпись в появившемся диалоговом окне выбираем разрешить операцию ОК"
 		sleep 60
 		killall yandex_browser
 		sleep 10
 		echo "Контур.Плагин"
 		sleep 3
-		python -m webbrowser "http://chrome.google.com/webstore/detail/%D0%BA%D0%BE%D0%BD%D1%82%D1%83%D1%80%D0%BF%D0%BB%D0%B0%D0%B3%D0%B8%D0%BD/hnhppcgejeffnbnioloohhmndpmclaga"
+		python -m webbrowser "https://chrome.google.com/webstore/detail/%D0%BA%D0%BE%D0%BD%D1%82%D1%83%D1%80%D0%BF%D0%BB%D0%B0%D0%B3%D0%B8%D0%BD/hnhppcgejeffnbnioloohhmndpmclaga"
 		sleep 60
 		killall yandex_browser
 		sleep 10
@@ -312,14 +312,14 @@ fi
 		cd /mnt/Disk2/repo/plugins/
 		echo "$PASSWORD" | sudo -S dnf -y install kontur.plugin_amd64.rpm
 		echo "$PASSWORD" | sudo -S dnf -y install kontur.plugin-4.0.6.244-1.x86_64.001499.rpm
-		python -m webbrowser "http://install.kontur.ru/kekep?_ga=2.232358492.2121287449.1613045347-237475827.1613045347"
+		python -m webbrowser "https://install.kontur.ru/kekep?_ga=2.232358492.2121287449.1613045347-237475827.1613045347"
 		sleep 60
 		killall yandex_browser
 		sleep 10
 		#ставим пакет с плагином в систему, а затем инсталируем его руками в браузер 
 		echo "$PASSWORD" | sudo -S dnf -y install diag.plugin*.rpm
 		sleep 10
-		python -m webbrowser "http://install.kontur.ru/kekep?_ga=2.232358492.2121287449.1613045347-237475827.1613045347"
+		python -m webbrowser "https://install.kontur.ru/kekep?_ga=2.232358492.2121287449.1613045347-237475827.1613045347"
 		sleep 60
 		killall yandex_browser
 		sleep 10
@@ -330,7 +330,7 @@ fi
 		#устанавливаем читалку для AutoCAD-файлов
 		cd /mnt/Disk2/repo/
 		echo "$PASSWORD" | sudo -S dnf -y install freeglut-devel
-		echo "$PASSWORD" | sudo -S dnf -y install http://www.varicad.com/userdata/files/release/en/VariCAD_2022-en-2.05-1.x86_64.rpm
+		echo "$PASSWORD" | sudo -S dnf -y install https://www.varicad.com/userdata/files/release/en/VariCAD_2022-en-2.05-1.x86_64.rpm
     fi
 	if [ $prog == "\"Krita,Gimp,Pinta\"" ]; then
         echo "Установка графических редакторов"
@@ -343,7 +343,7 @@ fi
         echo "Установка программы для сканирования VueScan"
 		sleep 3
 		#устанавливаем пакеты для сканирования и распознования текста
-		echo "$PASSWORD" | sudo -S dnf -y install http://www.hamrick.com/files/vuex6497.rpm
+		echo "$PASSWORD" | sudo -S dnf -y install https://www.hamrick.com/files/vuex6497.rpm
 		echo "Настройки программы VueScan выполняете самостоятельно"
 		sleep 3
     fi
