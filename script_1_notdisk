@@ -1,0 +1,59 @@
+#!/bin/bash
+echo "I. УСТАНОВКА И НАСТРОЙКА ОС"
+sleep 3
+#создаём временную переменную "$PASSWORD" для подставления пароля администратора
+PASSWORD=$(whiptail --title "Ввод пароля администратора" --passwordbox "Введите пароль Локального администратора и нажмите ОК для продолжения." 10 60 3>&1 1>&2 2>&3)
+exitstatus=$?
+if [ $exitstatus = 0 ]; then
+echo "Производится обновление системы"
+sleep 3
+echo "$PASSWORD" | sudo -S dnf -y update && echo "$PASSWORD" | sudo -S dnf -y upgrade && echo "$PASSWORD" | sudo -S dnf -y autoremove && uname -r
+else
+	echo "Вы выбрали отмену."
+	exit
+fi
+#
+#
+#
+echo "Добавляем компьютер в домен"
+sleep 3
+#устанавливаем правильный часовой пояс
+echo "$PASSWORD" | sudo -S timedatectl set-timezone Asia/Yekaterinburg
+timedatectl | grep "Time zone"
+date
+chronyc tracking
+#проверяем DNS и разрешение имён
+nslookup 10.14.100.222
+nslookup 10.17.101.222
+nslookup YG.loc
+#меняем локализацию на английскую. Это нужно, если у вас в пароле администратора домена присутствуют специальные символы: !@#$%^ и т.д..
+#после перезагрузки локализация снова сбросится на русскую
+export LANG=en_US.UTF-8
+#проверяем доступность домена
+realm discover YG.loc
+#устанавливаем программу добавления в домен
+echo "$PASSWORD" | sudo -S dnf -y install join-to-domain
+#запускаем скрипт добавления в домен
+sudo join-to-domain.sh || sudo join-to-domain.sh
+realm discover YG.loc
+#проверяем доступность домена
+realm list
+#создаём переменную DOMAIN и присваиваем ей значение dns-имени домена
+DOMAIN=$(dnsdomainname -d)
+realm discover -v $DOMAIN
+#проверяем новое имя компьютера
+hostname
+#даём группам "Администраторы домена" и "Пользователи домена" права выполнения команд от имени суперпользователя 
+cd /etc/
+echo "$PASSROOT" | sudo -S perl -i -pe 'print "%DO\\ Admins  ALL=(ALL)       ALL\n" if $. == 108' sudoers
+echo "$PASSROOT" | sudo -S perl -i -pe 'print "%Domain\\ Users  ALL=(ALL)       ALL\n" if $. == 109' sudoers
+#
+#
+#
+#перезагружаемся, иначе магия не сработает
+if (whiptail --title "Требуется перезагрузка системы" --yesno "Перезагрузить систему сейчас?" 10 60) then
+	echo "$PASSWORD" | sudo -S reboot
+else
+	echo "Не забудьте перезагрузить систему"
+	exit
+fi
