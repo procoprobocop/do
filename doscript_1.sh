@@ -67,8 +67,8 @@ realm discover -v $DOMAIN
 hostname
 #даём группам "Администраторы домена" и "Пользователи домена" права выполнения команд от имени суперпользователя 
 cd /etc/
-echo "$PASSROOT" | sudo -S perl -i -pe 'print "%DO\\ Admins  ALL=(ALL)       ALL\n" if $. == 108' sudoers
-echo "$PASSROOT" | sudo -S perl -i -pe 'print "%Domain\\ Users  ALL=(ALL)       ALL\n" if $. == 109' sudoers
+sudo perl -i -pe 'print "%DO\\ Admins  ALL=(ALL)       ALL\n" if $. == 108' sudoers
+sudo perl -i -pe 'print "%Domain\\ Users  ALL=(ALL)       ALL\n" if $. == 109' sudoers
 #
 #
 #
